@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <title>jQuery examples</title>
+        <link rel="stylesheet" type="text/css" href="styles.css">
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    </head>
+
+    <body>
+
+        <div class="header">
+            <marquee behavior="scroll" direction="right" scrollamount="5" loop="infinite">
+                <p class="rainbowText">jQueryLab - jQuery examples</p>
+            </marquee>
+        </div>
+
+        <div class="taskList">
+            <h3>1 - Task list:</h3>
+            <h5><i>Click on the tasks to remove them once you're finished!</i></h5>
+            <ul>
+                <li class="task">Wash the dishes.</li>
+                <li class="task">Clean the bedroom.</li>
+                <li class="task">Take the trash out.</li>
+                <li class="task">Do the homework.</li>
+            </ul>
+            <hr>
+        </div>
+
+        <div class="label">
+            <h3>2 - Label control:</h3>
+            <h5 id="labelOutput">Hello world!</h5>
+            <input placeholder="Type in some text" id="labelInput"/>
+            <button id="labelOutputButton">Change label</button>
+            <button id="labelColorButton">Change color</button>
+            <hr>
+        </div>
+
+        <div class="rainbow">
+            <h3>3 - Hover actions:</h3>
+            <p class="loremIpsum">Lorem ipsum dolor sit amet, consectetur adipiscing elit. At certe gravius. Sin aliud quid voles, postea. Hos contra singulos dici est melius. Iam contemni non poteris. Duo Reges: constructio interrete.</p>
+            <p class="loremIpsum">Iubet igitur nos Pythius Apollo noscere nosmet ipsos. Quonam, inquit, modo? Hic nihil fuit, quod quaereremus. Videmus igitur ut conquiescere ne infantes quidem possint.</p>
+            <p class="loremIpsum">Quid censes in Latino fore? Cur id non ita fit? Quod non faceret, si in voluptate summum bonum poneret.</p>
+            <p class="loremIpsum">Nonne igitur tibi videntur, inquit, mala? Iam id ipsum absurdum, maximum malum neglegi. An hoc usque quaque, aliter in vita? Restatis igitur vos;</p>
+            <hr>
+        </div>
+
+        <div class="imageContainer">
+            <h3>4 - Image control:</h3>
+            <img height="300" width="450" id="image" src="./assets/1.jpg">
+            <br>
+            <button id="imageButton">Change image</button>
+            <hr>
+        </div>
+
+        <div class="apisContainer">
+            <h3>5 - Dictionary APIs call</h3>
+            <p id="apiWarning">Please click the button bellow.</p>
+            <p id="word"></p>
+            <p id="definition"></p>
+            <button id="wordButton">Search word</button>
+            <hr>
+        </div>
+
+        <div class="dynamicListContainer">
+            <h3>6 - Dynamic list</h3>
+            <ul>
+                <li id="li1">1</li>
+                <li id="li2">2</li>
+                <li id="li3">3</li>
+            </ul>
+            <button id="dynamicListButton">Add number</button>
+            <hr>
+        </div>
+
+        <script>
+            // Task list logic
+            $(document).ready(() => {
+                $(".task").click((event) => {
+                    $(event.target).hide();
+                });
+                $(".task").hover((event) => {
+                    $(event.target).css({fontWeight: "bold"})
+                }, (event) => {
+                    $(event.target).css({fontWeight: "normal"})
+                })
+            });
+
+            // Label control logic
+            $(document).ready(() => {
+                $("#labelOutputButton").click((event) => {
+                    $("#labelOutput")[0].textContent = $("#labelInput").val();
+                });
+                $("#labelColorButton").click((event) => {
+                    const colors = ["red", "green", "blue", "yellow"];
+                    const color = colors[Math.trunc(Math.random() * 4)];
+                    $("#labelOutput").css({color: color});
+                })
+            });
+
+            // Hover actions control
+            $(document).ready(() => {
+                $(".loremIpsum").on({
+                    mouseenter: (event) => {
+                        const colors = ["red", "green", "blue", "yellow", "pink", "purple", "orange"];
+                        const color1 = colors[Math.trunc(Math.random() * 7)];
+                        const color2 = colors.filter(color => color !== color1)[Math.trunc(Math.random() * 6)];
+                        // Change text color and background color when hovered
+                        $(event.target).css({
+                            color: color1,
+                            backgroundColor: color2
+                        });
+                    },
+                    mouseleave: (event) => {
+                        // Revert text color and background color when unhovered
+                        $(event.target).css({
+                            color: "", // Empty string resets to the default
+                            backgroundColor: "" // Empty string resets to the default
+                        });
+                    }
+                });
+            });
+
+            // Image control logic
+            let imageCounter = 2;
+            $(document).ready(() => {
+                $("#imageButton").click(() => {
+                    $("#image").attr("src", `./assets/${imageCounter}.jpg`);
+                    if (imageCounter === 5){
+                        imageCounter = 1;
+                    } else {
+                        imageCounter++;
+                    }
+                });
+            });
+
+            // API calls logic
+            $(document).ready(() => {
+                $("#wordButton").click(() => {
+                    let word, definition;
+
+                    // Hide the warning initially
+                    $("#apiWarning").hide();
+
+                    $.get("https://random-word-api.herokuapp.com/word")
+                        .done((data) => {
+                            word = data[0];
+                            $.get(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`)
+                                .done((data) => {
+                                    definition = data[0].meanings[0].definitions[0].definition;
+                                    // Update the HTML elements inside this callback
+                                    $("#word")[0].textContent = `Your word is: ${word}`;
+                                    $("#definition")[0].textContent = `Definition: ${definition}`;
+                                })
+                                .fail(() => {
+                                    // Handle the 404 error for the second request
+                                    $("#word")[0].textContent = `Your word is: ${word}`;
+                                    $("#definition")[0].textContent = `Definition: not found.`;
+                                });
+                        });
+                });
+            });
+
+            // Dynamic list logic
+            let dynamicListCounter = 3;
+            $(document).ready(() => {
+                $("#dynamicListButton").click(() => {
+                    dynamicListCounter++;
+                    $(`#li${dynamicListCounter - 1}`).after(`<li id="li${dynamicListCounter}">${dynamicListCounter}</li>`);
+                });
+            });
+
+
+        </script>
+
+    </body>
+
+</html>
